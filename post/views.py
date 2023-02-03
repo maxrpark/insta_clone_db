@@ -2,10 +2,10 @@ import cloudinary
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
-from .permissions import IsPostOrIsAuthenticated
+from .permissions import IsPostOrIsAuthenticated, IsUserObjectOrReadOnly
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from .serializers import PostSerializer
+from .serializers import PostSerializer, PostCommentSerializer
 from user.models import User
 from .models import Post, PostComment
 
@@ -85,12 +85,12 @@ class PostView(APIView):
             return Response({"data": e})
 
 
-class commentPost(APIView):
+class CreateComment(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, req):
 
-        values = ["post", "author", "content"]
+        values = ["post_id", "content"]
 
         req_data = req.data
         missing = [
@@ -100,20 +100,52 @@ class commentPost(APIView):
             return Response({"message": f"The following keys are missing: {missing}"})
 
         user = User.objects.get(insta_id=req.user)
-        if user is None:
-            return Response({"message": "No user found"})
-        post = Post.objects.filter(pk=req_data['id']).last()
-        if user is None:
-            return Response({"message": "No user found"})
 
-        new_post = PostComment(
-            post=post,
-            author=user,
-            content=req_data['content']
-        )
-    # post
-    # author
-    # content
+        if user is None:
+            return Response({"message": "No user found"})
+        try:
+            post = Post.objects.filter(pk=req_data['post_id']).last()
+            if user is None:
+                return Response({"message": "No user found"})
+
+            new_comment = PostComment(
+                post=post,
+                author=user,
+                content=req_data['content']
+            )
+
+            new_comment.save()
+            serializer = PostCommentSerializer(new_comment)
+
+            return Response({"data": serializer.data})
+
+        except Exception as e:
+            return Response({"data": e})
+
+
+class PostComments(APIView):
+    permission_classes = [IsUserObjectOrReadOnly]
+
+    def get(self, req, pk):
+        try:
+            post = Post.objects.get(pk=pk)
+            comments = PostComment.objects.filter(post=post)
+            serializer = PostCommentSerializer(comments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_404_NOT_FOUND, template_name=None, content_type=None)
+
+    def delete(self, req, pk):
+        try:
+            comments = PostComment.objects.get(pk=pk)
+            self.check_object_permissions(self.request, comments)
+            comments.delete()
+
+            return Response({"msg": "deleted"}, status=status.HTTP_200_OK)
+        except:
+            return Response({"msg": f"No post found with id {pk}"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class replyComment(APIView):
@@ -132,7 +164,7 @@ class PostStory(APIView):
 # SinglePost
 
 class SinglePost(APIView):
-    permission_classes = [IsPostOrIsAuthenticated]
+    permission_classes = [IsUserObjectOrReadOnly]
 
     def get(self, req, pk):
         try:
@@ -147,6 +179,7 @@ class SinglePost(APIView):
     def delete(self, req, pk):
         try:
             post = Post.objects.get(pk=pk)
+            self.check_object_permissions(self.request, post)
             post.delete()
 
             return Response({"msg": "deleted"}, status=status.HTTP_200_OK)
@@ -166,6 +199,7 @@ class SinglePost(APIView):
             return Response({"message": f"The following keys are missing: {missing}"})
         try:
             post = Post.objects.get(pk=pk)
+            self.check_object_permissions(self.request, post)
             serializer = PostSerializer(post, data={
                 'content': req_data['content'],
                 'location': req_data['location'],
