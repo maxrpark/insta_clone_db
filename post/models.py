@@ -11,7 +11,7 @@ from django.db import models
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
-    location = models.TextField(null=True,  default=None)
+    location = models.TextField(null=True, default=None)
     upload_at = models.DateTimeField(auto_now=True)
     is_good = models.BooleanField(default=True)
     is_comment = models.BooleanField(default=True)
