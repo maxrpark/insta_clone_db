@@ -40,10 +40,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     insta_id = models.CharField(max_length=255, unique=True)
     is_professional = models.BooleanField(default=False)
 
-    profile_pic = models.TextField()
-    profile_name = models.TextField()
-    profile_website = models.TextField()
-    profile_info = models.TextField()
+    profile_pic = models.TextField(blank=True, null=True)
+    profile_name = models.TextField(blank=True, null=True)
+    profile_website = models.TextField(blank=True, null=True)
+    profile_info = models.TextField(blank=True, null=True)
 
     start_date = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
