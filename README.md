@@ -1,16 +1,43 @@
--   User
+# BACKEND for React Native Instagram Clone
 
--   Post
+-   [React native repository](https://github.com/maxrpark/react_native_instagram_clone)
+
+## Auth
+
+-   [x] Register
+-   [x] Login
+-   [x] Logout
+
+## Profile
+
+-   [x] View profile posts
+-   [x] View profile info
+-   [x] edit profile info
+
+## Post
+
 -   [x] Upload Image
+    -   [x] Cloudinary
 -   [x] Create
 -   [x] View all // TODO Check Permission get
--   [] View user post
--   [x] View single post
--   [x] Edit
--   [x] Delete
 
-ReplyComment
+-   [x] Single post
+    -   [x] GET
+    -   [x] PATCH
+    -   [x] DELETE
 
--   [x] Post
--   [x] View all
--   [x] Delete
+## Comments
+
+-   [x] POST
+-   [x] GET
+-   [x] DELEtE
+
+## Reply Comments
+
+-   [x] POST
+-   [x] GET
+-   [x] DELEtE
+
+## TODO
+
+## Post story

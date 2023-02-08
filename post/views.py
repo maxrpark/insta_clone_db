@@ -56,7 +56,7 @@ class PostView(APIView):
 
     def post(self, req):
         values = ["content", "location",
-                  "is_good", "is_good"]
+                  "is_good", "is_good", 'is_reel']
 
         req_data = req.data
         missing = [value for value in values if value not in req_data.keys()]
@@ -75,6 +75,7 @@ class PostView(APIView):
                 location=req_data['location'],
                 is_good=req_data['is_good'],
                 is_comment=req_data['is_comment'],
+                is_reel=req_data['is_reel'],
             )
 
             new_post.save()
@@ -94,7 +95,30 @@ class UserPosts(APIView):
             posts = Post.objects.filter(author=user)
             serializer = PostSerializer(posts, many=True)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                'data': serializer.data,
+                'count': len(serializer.data)},
+                status=status.HTTP_200_OK
+            )
+        except:
+            return Response({"msg": f"No post found with id {pk}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserReels(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, req, pk):
+        try:
+            user = User.objects.get(pk=pk)
+            posts = Post.objects.filter(author=user, is_reel=True)
+            serializer = PostSerializer(posts, many=True)
+
+            return Response({
+                'data': serializer.data,
+                'count': len(serializer.data)},
+                status=status.HTTP_200_OK
+            )
         except:
             return Response({"msg": f"No post found with id {pk}"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -216,12 +240,6 @@ class PostComments(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class PostStory(APIView):
-
-    def post(self, req):
-        pass
-
-
 class ReplyComment(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -284,3 +302,9 @@ class ReplyComment(APIView):
 
         except Exception as e:
             return Response({"data": e})
+
+
+class PostStory(APIView):
+
+    def post(self, req):
+        pass

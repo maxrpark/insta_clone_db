@@ -27,7 +27,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 class UpdateUserDetails(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsUserObjectOrReadOnly]
 
     def get(self, req, id):
         user = User.objects.filter(pk=id).last()
@@ -40,7 +40,7 @@ class UpdateUserDetails(APIView):
         user = User.objects.filter(pk=id).last()
         if user is None:
             return Response({'msg': 'No user found'}, status=status.HTTP_400_BAD_REQUEST)
-
+        self.check_object_permissions(self.request, user)
         req_data = req.data
 
         data = {

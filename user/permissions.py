@@ -11,5 +11,5 @@ class IsUserObjectOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.method in permissions.SAFE_METHODS or bool(
-            request.user == obj.author
+            request.user.insta_id == obj.insta_id
         )

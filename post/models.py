@@ -15,6 +15,7 @@ class Post(models.Model):
     upload_at = models.DateTimeField(auto_now=True)
     is_good = models.BooleanField(default=True)
     is_comment = models.BooleanField(default=True)
+    is_reel = models.BooleanField(default=False)
     goods = models.PositiveIntegerField(default=True)
 
     def publish(self):
