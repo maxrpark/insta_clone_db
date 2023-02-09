@@ -24,7 +24,7 @@ class CustomAccountManager(BaseUserManager):
     def create_user(self, email, insta_id, password, **other_fields):
 
         if not email:
-            raise ValueError(_('You must provide an email address'))
+            raise ValueError('You must provide an email address')
 
         email = self.normalize_email(email)
         user = self.model(email=email,
@@ -36,9 +36,15 @@ class CustomAccountManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(blank=True, default='', unique=True)
-    user_name = models.CharField(max_length=150)
+    user_name = models.CharField(max_length=150, blank=True)
     insta_id = models.CharField(max_length=255, unique=True)
     is_professional = models.BooleanField(default=False)
+
+    followers = models.ManyToManyField(
+        'User', related_name="user_followers", blank=True)
+
+    following = models.ManyToManyField(
+        'User', related_name="user_following", blank=True)
 
     profile_pic = models.TextField(blank=True, null=True)
     profile_name = models.TextField(blank=True, null=True)
@@ -52,6 +58,27 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'insta_id'
     REQUIRED_FIELDS = ['email']
+
+    # def follow_user(self, follower):
+    #     return self.following.add(follower)
+
+    # def unfollow_user(self, to_unfollow):
+    #     return self.following.remove(to_unfollow)
+
+    def is_following(self, checkuser):
+        return checkuser in self.following.all()
+
+    # def get_number_of_followers(self):
+    #     if self.followers.count():
+    #         return self.followers.count()
+    #     else:
+    #         return 0
+
+    # def get_number_of_following(self):
+    #     if self.following.count():
+    #         return self.following.count()
+    #     else:
+    #         return 0
 
     def __str__(self):
         return self.insta_id

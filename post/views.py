@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from .serializers import PostSerializer, PostCommentSerializer, ReplyCommentSerializer
 from user.models import User
-from .models import Post, PostComment, PostCommentReply
+from .models import Post, PostComment, PostCommentReply, Images
 
 
 class UploadImage(APIView):
@@ -56,7 +56,7 @@ class PostView(APIView):
 
     def post(self, req):
         values = ["content", "location",
-                  "is_good", "is_good", 'is_reel']
+                  "is_good", "is_good", 'is_reel', "images"]
 
         req_data = req.data
         missing = [value for value in values if value not in req_data.keys()]
@@ -80,6 +80,10 @@ class PostView(APIView):
 
             new_post.save()
             serializer = PostSerializer(new_post)
+
+            for image in req_data['images']:
+                post_image = Images(post=new_post, image=image)
+                post_image.save()
 
             return Response({"data": serializer.data})
         except Exception as e:
