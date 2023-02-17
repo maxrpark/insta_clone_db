@@ -8,6 +8,8 @@ from rest_framework import status
 from .serializers import PostSerializer, PostCommentSerializer, ReplyCommentSerializer
 from user.models import User
 from .models import Post, PostComment, PostCommentReply, Images
+from django.views.generic.list import ListView
+from rest_framework.generics import ListCreateAPIView
 
 
 class UploadImage(APIView):
@@ -40,6 +42,20 @@ class UploadImage(APIView):
         return Response({
             'msg': f" {file.content_type} Invalid format, valid formats are jpg/png/jpg",
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserFeeds(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, req):
+        posts = Post.objects.filter(
+            author__followers=self.request.user.id)
+        serializer = PostSerializer(posts, many=True)
+        try:
+            return Response({"posts": serializer.data, "count": len(serializer.data)}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_404_NOT_FOUND, template_name=None, content_type=None)
 
 
 class PostView(APIView):
@@ -85,7 +101,7 @@ class PostView(APIView):
                 post_image = Images(post=new_post, image=image)
                 post_image.save()
 
-            return Response({"data": serializer.data})
+            return Response({"post": serializer.data})
         except Exception as e:
             return Response({"data": e})
 
@@ -100,7 +116,7 @@ class UserPosts(APIView):
             serializer = PostSerializer(posts, many=True)
 
             return Response({
-                'data': serializer.data,
+                'posts': serializer.data,
                 'count': len(serializer.data)},
                 status=status.HTTP_200_OK
             )

@@ -17,6 +17,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add custom claims
         token['insta_id'] = user.insta_id
+        token['profile_pic'] = user.profile_pic
         # ...
 
         return token
@@ -29,15 +30,15 @@ class MyTokenObtainPairView(TokenObtainPairView):
 class UpdateUserDetails(APIView):
     permission_classes = [IsUserObjectOrReadOnly]
 
-    def get(self, req, id):
-        user = User.objects.filter(pk=id).last()
+    def get(self, req, insta_id):
+        user = User.objects.filter(insta_id=insta_id).last()
         if user is None:
             return Response({'msg': 'No user found'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = UserBasicSerializer(user)
         return Response({'user': serializer.data})
 
-    def patch(self, req, id):
-        user = User.objects.filter(pk=id).last()
+    def patch(self, req, insta_id):
+        user = User.objects.filter(insta_id=insta_id).last()
         if user is None:
             return Response({'msg': 'No user found'}, status=status.HTTP_400_BAD_REQUEST)
         self.check_object_permissions(self.request, user)

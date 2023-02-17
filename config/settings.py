@@ -175,6 +175,9 @@ SIMPLE_JWT = {  # auth settings
 DJOSER = {
     'LOGIN_FIELD': 'insta_id',
     # 'USER_CREATE_PASSWORD_RETYPE': True
+    'SERIALIZERS': {
+        'current_user': 'user.serializers.UserMe',
+    },
 }
 
 
